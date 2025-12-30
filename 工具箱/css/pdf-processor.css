@@ -1,0 +1,486 @@
+.upload-section {
+    margin-bottom: 30px;
+}
+
+.upload-area {
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.upload-area.drag-over {
+    border-color: #2196F3;
+    background-color: #E3F2FD;
+}
+
+.upload-area.has-file {
+    border-style: solid;
+    border-color: #4CAF50;
+    background-color: #f1f8e9;
+}
+
+.upload-icon {
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+
+.upload-content {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.upload-content p {
+    margin-bottom: 25px;
+    color: #666;
+}
+
+.upload-btn {
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.upload-btn:hover {
+    background-color: #1976D2;
+}
+
+.pdf-list {
+    display: grid;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.pdf-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.pdf-info {
+    flex: 1;
+}
+
+.pdf-name {
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.pdf-pages {
+    color: #666;
+    font-size: 14px;
+}
+
+.pdf-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.controls {
+    display: grid;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.control-group {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.control-group h3 {
+    margin: 0 0 10px 0;
+    color: #333;
+}
+
+.description {
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.hint {
+    color: #666;
+    font-size: 14px;
+    margin-top: 8px;
+}
+
+.split-controls, .convert-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.action-btn {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s;
+    position: relative;
+    height: 40px; /* 固定高度 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 选中状态样式 */
+.action-btn.active {
+    background-color: #2E7D32;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* 添加底部指示条 */
+.action-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: #FFF;
+}
+
+.action-btn:hover:not(:disabled) {
+    background-color: #45a049;
+    transform: translateY(-1px);
+}
+
+.action-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+input[type="text"], select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+input[type="text"]:disabled, select:disabled {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+}
+
+.function-section {
+    margin: 20px 0;
+}
+
+.function-block {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.function-block h3 {
+    margin: 0 0 10px 0;
+    color: #333;
+}
+
+.function-block p {
+    margin: 0 0 15px 0;
+    color: #666;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.input-group input[type="text"] {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.input-group select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: white;
+}
+
+.function-sections {
+    margin-top: 20px;
+}
+
+.function-section {
+    display: none;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.function-section.active {
+    display: block;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.input-group input[type="text"],
+.input-group select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.input-group input[type="text"] {
+    flex: 1;
+}
+
+.hint {
+    color: #666;
+    font-size: 14px;
+    margin-top: 8px;
+}
+
+.input-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.clear-btn {
+    padding: 6px 12px;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.clear-btn:hover {
+    background-color: #d32f2f;
+}
+
+/* 预览状态样式 */
+.preview-content {
+    width: 100%;
+    padding: 30px;
+}
+
+.file-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.file-icon {
+    font-size: 32px;
+}
+
+.file-details {
+    flex: 1;
+}
+
+.file-name {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.file-meta {
+    font-size: 14px;
+    color: #666;
+}
+
+/* Toast 提示样式 */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 4px;
+    font-size: 14px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+
+.toast.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-20px);
+}
+
+/* 功能按钮样式 */
+.actions-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.function-sections {
+    margin-top: 20px;
+}
+
+.function-section {
+    display: none;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.function-section.active {
+    display: block;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.input-group input[type="text"],
+.input-group select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.input-group input[type="text"] {
+    flex: 1;
+}
+
+.hint {
+    color: #666;
+    font-size: 14px;
+    margin-top: 8px;
+}
+
+.input-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.clear-btn {
+    padding: 6px 12px;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.clear-btn:hover {
+    background-color: #d32f2f;
+}
+
+/* 预览状态样式 */
+.preview-content {
+    width: 100%;
+    padding: 30px;
+}
+
+.file-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.file-icon {
+    font-size: 32px;
+}
+
+.file-details {
+    flex: 1;
+}
+
+.file-name {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.file-meta {
+    font-size: 14px;
+    color: #666;
+}
+
+/* 编辑功能区样式 */
+.edit-container {
+    position: relative;
+    margin: 20px 0;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: auto;
+}
+
+.pdf-text-element {
+    position: absolute;
+    cursor: move;
+    padding: 2px;
+    border: 1px solid transparent;
+    min-width: 10px;
+    transform-origin: left top;
+    white-space: pre;
+    user-select: none;
+}
+
+.pdf-text-element:hover {
+    border-color: #2196F3;
+    background: rgba(33, 150, 243, 0.1);
+}
+
+.pdf-image-element {
+    position: absolute;
+    cursor: move;
+    border: 1px solid transparent;
+    transform-origin: left top;
+    pointer-events: all;
+    user-select: none;
+}
+
+.pdf-image-element:hover {
+    border-color: #2196F3;
+} 
