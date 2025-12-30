@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文本对比工具 - 实用工具集合</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/text-compare.css">
+</head>
+<body>
+    <header>
+        <h1>文本对比工具</h1>
+    </header>
+    
+    <main>
+        <div class="tool-container">
+            <div class="compare-section">
+                <div class="text-input">
+                    <label for="text1">文本 1:</label>
+                    <textarea id="text1" placeholder="请输入第一段文本"></textarea>
+                </div>
+                <div class="text-input">
+                    <label for="text2">文本 2:</label>
+                    <textarea id="text2" placeholder="请输入第二段文本"></textarea>
+                </div>
+            </div>
+
+            <div class="actions-section">
+                <button id="compareBtn" class="action-btn">开始对比</button>
+                <button id="clearBtn" class="action-btn">清空</button>
+            </div>
+
+            <div class="result-section">
+                <div class="result-header">
+                    <h3>对比结果</h3>
+                    <div class="stats">
+                        <span id="charCount">字符数: 0 vs 0</span>
+                        <span id="diffCount">差异数: 0</span>
+                    </div>
+                </div>
+                <div id="resultContent" class="result-content">
+                    <!-- 对比结果将在这里显示 -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/modules/text-compare.js"></script>
+</body>
+</html> 

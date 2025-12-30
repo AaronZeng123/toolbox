@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>表格转 JSON 工具</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen p-8">
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold mb-6 text-gray-800">表格转 JSON 工具</h1>
+        
+        <div class="mb-8">
+            <label class="block text-sm font-medium text-gray-700 mb-2">上传表格文件 (.xlsx, .csv)</label>
+            <div class="flex items-center justify-center w-full">
+                <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                        <svg class="w-8 h-8 mb-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                        </svg>
+                        <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">点击上传</span> 或拖拽文件到这里</p>
+                        <p class="text-xs text-gray-500">支持 .xlsx, .csv 格式</p>
+                    </div>
+                    <input id="dropzone-file" type="file" class="hidden" accept=".xlsx, .xls, .csv" />
+                </label>
+            </div>
+            <div id="file-name" class="mt-2 text-sm text-gray-600 hidden"></div>
+        </div>
+
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">输出格式</label>
+            <div class="flex space-x-4">
+                <label class="inline-flex items-center">
+                    <input type="radio" class="form-radio" name="format" value="json" checked>
+                    <span class="ml-2">JSON</span>
+                </label>
+                <label class="inline-flex items-center">
+                    <input type="radio" class="form-radio" name="format" value="jsonl">
+                    <span class="ml-2">JSONL</span>
+                </label>
+                <label class="inline-flex items-center">
+                    <input type="radio" class="form-radio" name="format" value="markdown">
+                    <span class="ml-2">Markdown</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <div class="flex justify-between items-center mb-2">
+                <label class="block text-sm font-medium text-gray-700" id="output-label">转换结果 (JSON)</label>
+                <button id="copy-btn" class="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors hidden">
+                    复制内容
+                </button>
+            </div>
+            <textarea id="output" class="w-full h-96 p-4 text-sm font-mono text-gray-800 bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" readonly placeholder="上传文件后将在此处显示转换结果..."></textarea>
+            
+            <div class="mt-2 flex space-x-6 text-sm text-gray-600 bg-gray-100 p-2 rounded">
+                <div>字符数: <span id="char-count" class="font-bold text-gray-800">0</span></div>
+                <div>预估 Token (GPT-4): <span id="token-count" class="font-bold text-blue-600">0</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('dropzone-file');
+        const outputArea = document.getElementById('output');
+        const fileNameDisplay = document.getElementById('file-name');
+        const copyBtn = document.getElementById('copy-btn');
+        const outputLabel = document.getElementById('output-label');
+        const formatRadios = document.querySelectorAll('input[name="format"]');
+        const charCountDisplay = document.getElementById('char-count');
+        const tokenCountDisplay = document.getElementById('token-count');
+
+        let currentData = null; // Store parsed data
+
+        fileInput.addEventListener('change', handleFile);
+        
+        formatRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                if (currentData) {
+                    renderOutput();
+                }
+            });
+        });
+
+        function handleFile(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            fileNameDisplay.textContent = `当前文件: ${file.name}`;
+            fileNameDisplay.classList.remove('hidden');
+
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
+                    
+                    if (jsonData.length === 0) {
+                        currentData = [];
+                        renderOutput();
+                        return;
+                    }
+
+                    const headers = jsonData[0].map(h => String(h || "").trim());
+                    const result = [];
+
+                    for (let i = 1; i < jsonData.length; i++) {
+                        const row = jsonData[i];
+                        if (row.length === 0 || row.every(cell => cell === undefined || cell === "")) {
+                            continue;
+                        }
+
+                        const obj = {};
+                        headers.forEach((header, index) => {
+                            let val = row[index];
+                            if (val === undefined || val === null) {
+                                val = "";
+                            } else {
+                                val = String(val);
+                            }
+                            obj[header] = val;
+                        });
+                        result.push(obj);
+                    }
+
+                    currentData = result;
+                    renderOutput();
+                    copyBtn.classList.remove('hidden');
+
+                } catch (error) {
+                    console.error(error);
+                    alert('文件解析失败，请检查文件格式');
+                }
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        function renderOutput() {
+            if (!currentData) return;
+
+            const format = document.querySelector('input[name="format"]:checked').value;
+            let output = "";
+
+            if (format === 'json') {
+                output = JSON.stringify(currentData, null, 2);
+                outputLabel.textContent = "转换结果 (JSON)";
+            } else if (format === 'jsonl') {
+                output = currentData.map(item => JSON.stringify(item)).join('\n');
+                outputLabel.textContent = "转换结果 (JSONL)";
+            } else if (format === 'markdown') {
+                output = convertToMarkdown(currentData);
+                outputLabel.textContent = "转换结果 (Markdown)";
+            }
+
+            outputArea.value = output;
+            updateStats(output);
+        }
+
+        function updateStats(text) {
+            // Character count
+            const len = text.length;
+            charCountDisplay.textContent = len.toLocaleString();
+
+            // Estimated Token count (Heuristic)
+            // CJK characters: ~1.5 tokens
+            // English/Numbers: ~0.25 tokens (1 token ≈ 4 chars)
+            // This is a rough estimation for GPT-4 (cl100k_base)
+            
+            let cjkCount = 0;
+            let otherCount = 0;
+
+            for (let i = 0; i < len; i++) {
+                const code = text.charCodeAt(i);
+                // Simple CJK range check
+                if (code >= 0x4E00 && code <= 0x9FFF) {
+                    cjkCount++;
+                } else {
+                    otherCount++;
+                }
+            }
+
+            const estimatedTokens = Math.ceil((cjkCount * 1.5) + (otherCount / 4));
+            tokenCountDisplay.textContent = estimatedTokens.toLocaleString();
+        }
+
+        function convertToMarkdown(data) {
+            if (data.length === 0) return "";
+            
+            const headers = Object.keys(data[0]);
+            
+            // Header row
+            let md = "| " + headers.join(" | ") + " |\n";
+            
+            // Separator row
+            md += "| " + headers.map(() => "---").join(" | ") + " |\n";
+            
+            // Data rows
+            data.forEach(row => {
+                const values = headers.map(header => {
+                    // Escape pipe characters in values to prevent breaking the table
+                    return String(row[header]).replace(/\|/g, '\\|');
+                });
+                md += "| " + values.join(" | ") + " |\n";
+            });
+            
+            return md;
+        }
+
+        copyBtn.addEventListener('click', () => {
+            outputArea.select();
+            document.execCommand('copy');
+            const originalText = copyBtn.textContent;
+            copyBtn.textContent = '已复制!';
+            setTimeout(() => {
+                copyBtn.textContent = originalText;
+            }, 2000);
+        });
+
+        // 拖拽支持
+        const dropzone = document.querySelector('label[for="dropzone-file"]');
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            dropzone.classList.add('bg-gray-100', 'border-blue-500');
+        }
+
+        function unhighlight(e) {
+            dropzone.classList.remove('bg-gray-100', 'border-blue-500');
+        }
+
+        dropzone.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            fileInput.files = files;
+            handleFile({ target: { files: files } });
+        }
+    </script>
+</body>
+</html>

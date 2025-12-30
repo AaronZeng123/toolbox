@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Markdown 解析工具</title>
+<link href="https://cdn.jsdelivr.net/npm/sakura-css@1.4.1/sakura.css" rel="stylesheet" type="text/css" />
+<style>
+body{max-width:1470px;margin:0 auto;padding:16px}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.col-input{flex:1 1 400px}
+.col-preview{flex:2 1 800px}
+textarea{width:100%;height:500px;font-family: monospace;}
+.controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.output{border:1px solid #e5e7eb;border-radius:8px;padding:12px;min-height:500px}
+.card{border:1px solid #e5e7eb;border-radius:8px;padding:12px;margin-top:12px}
+.small{font-size:12px;color:#6b7280}
+.btn{padding:8px 12px;border:1px solid #111;border-radius:6px;background:#fff;cursor:pointer}
+.btn.primary{background:#111;color:#fff;border-color:#111}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+
+/* Heading Colors */
+.output h1, .card h1 { color: #1a1a1a; }
+.output h2, .card h2 { color: #2c3e50; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
+.output h3, .card h3 { color: #e67e22; } /* Orange/Reddish for 3rd level */
+.output h4, .card h4 { color: #27ae60; } /* Green for 4th level */
+.output h5, .card h5 { color: #8e44ad; } /* Purple for 5th level */
+.output h6, .card h6 { color: #c0392b; } /* Red for 6th level */
+.output strong, .card strong { color: #c0392b; } /* Red for bold text */
+</style>
+</head>
+<body>
+<h1>Markdown 解析工具</h1>
+<div class="row">
+  <div class="col-input">
+    <h3>输入文本</h3>
+    <textarea id="inputText" placeholder="粘贴 Markdown 内容或选择文件"></textarea>
+    <div class="controls">
+      <input type="file" id="fileInput" multiple accept=".md,.txt" />
+      <button class="btn primary" id="runBtn">预览</button>
+      <button class="btn" id="downloadHtmlBtn">下载HTML</button>
+    </div>
+    <div class="small">标准 Markdown 解析，支持 GFM (GitHub Flavored Markdown)。</div>
+  </div>
+  <div class="col-preview">
+    <h3>预览</h3>
+    <div id="outputHTML" class="output"></div>
+  </div>
+</div>
+
+<h3>批量结果</h3>
+<div id="batchResults" class="grid"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.3/dist/purify.min.js"></script>
+<script>
+function toHTML(md){
+  marked.setOptions({gfm:true,breaks:true});
+  const html=marked.parse(md||"");
+  return DOMPurify.sanitize(html);
+}
+
+function processOne(text){
+  const h=toHTML(text);
+  return {html:h, raw: text};
+}
+
+function download(name,content,type){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([content],{type}));
+  a.download=name;
+  a.click();
+}
+
+const inputText=document.getElementById('inputText');
+const outputHTML=document.getElementById('outputHTML');
+const runBtn=document.getElementById('runBtn');
+const downloadHtmlBtn=document.getElementById('downloadHtmlBtn');
+const fileInput=document.getElementById('fileInput');
+let lastResult={html:"", raw: ""};
+
+runBtn.addEventListener('click',()=>{
+  const res=processOne(inputText.value);
+  lastResult=res;
+  outputHTML.innerHTML=res.html;
+});
+
+downloadHtmlBtn.addEventListener('click',()=>{
+  if(!lastResult.html) return;
+  const html='<!doctype html><meta charset="utf-8"><div>'+lastResult.html+'</div>';
+  download('parsed.html',html,'text/html');
+});
+
+fileInput.addEventListener('change',()=>{
+  const files=[...fileInput.files];
+  const container=document.getElementById('batchResults');
+  container.innerHTML='';
+  files.forEach(f=>{
+    const reader=new FileReader();
+    reader.onload=()=>{
+      const res=processOne(reader.result);
+      const card=document.createElement('div');
+      card.className='card';
+      const name=document.createElement('h4');
+      name.textContent=f.name;
+      const preview=document.createElement('div');
+      preview.innerHTML=res.html;
+      const actions=document.createElement('div');
+      
+      const btnHtml=document.createElement('button');
+      btnHtml.className='btn';
+      btnHtml.textContent='下载HTML';
+      btnHtml.onclick=()=>download(f.name.replace(/\.[^.]+$/, '')+'.html','<!doctype html><meta charset="utf-8"><div>'+res.html+'</div>','text/html');
+      
+      actions.appendChild(btnHtml);
+      card.appendChild(name);
+      card.appendChild(preview);
+      card.appendChild(actions);
+      container.appendChild(card);
+    };
+    reader.readAsText(f,'utf-8');
+  });
+});
+</script>
+</body>
+</html>
